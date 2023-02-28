@@ -48,7 +48,7 @@ class OPCSCode {
 public class OPCSParser {
 
 
-	public CodeSystem processCodeSystem(String codeFile, String metaFile, String version, String outFolder)
+	public CodeSystem processCodeSystem(String codeFile, String metaFile, String version, String date, String outFolder)
 			throws IOException {
 		
 
@@ -122,7 +122,7 @@ public class OPCSParser {
 		CodeSystem codeSystem = new CodeSystem();
 		
 		DateTimeType dt = new DateTimeType();
-		dt.setValueAsString(version.equals("4.8")?"2017-04-01":(version.equals("4.9")?"2020-04-01":null));
+		dt.setValueAsString(date);
 		
 		codeSystem.setId(title.replaceAll("\\s", "-") + "-" + version);
 		codeSystem.setName(title.replaceAll("\\s", "_"))
@@ -134,8 +134,8 @@ public class OPCSParser {
 		.setStatus(PublicationStatus.ACTIVE)
 		.setExperimental(false)
 		.setCopyright(
-				"Copyright © 2020 Health and Social Care Information Centre. NHS Digital is the trading name of the Health and Social Care Information Centre.")
-		.setPublisher("NHS Digital")
+				"Copyright © 2020 Health and Social Care Information Centre. NHS England is the trading name of the Health and Social Care Information Centre.")
+		.setPublisher("NHS England")
 		.setDescription(title + " FHIR CodeSystem")
 		.setContent(CodeSystemContentMode.COMPLETE);
 		
@@ -224,10 +224,10 @@ public class OPCSParser {
 		return codeSystem;
 	}
 
-	public void processCodeSystemWithUpdate(String codeFile, String metaFile, String version, String outFolder,
+	public void processCodeSystemWithUpdate(String codeFile, String metaFile, String version, String date, String outFolder,
 			String txServerUrl, FeedClient feedClient) throws IOException {
 		version = version.replaceAll("/", ".");
-		CodeSystem cs = processCodeSystem(codeFile, metaFile, version, outFolder);
+		CodeSystem cs = processCodeSystem(codeFile, metaFile, version, date, outFolder);
 		String outFileName = "CodeSystem-OPCS-4-" + version + ".json";
 		File outFile = new File( outFolder , outFileName );
 		

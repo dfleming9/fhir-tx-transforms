@@ -129,7 +129,8 @@ public class Parser {
 		for (String v : versions) {
 			String codeFile = props.getProperty("opcs.version." + v + ".codeFile");
 			String validFile = props.getProperty("opcs.version." + v + ".validFile");
-			parseSingleOPCS(codeFile, validFile, v, outFolder, parser);
+			String date = props.getProperty("opcs.version." + v + ".date");
+			parseSingleOPCS(codeFile, validFile, v, date, outFolder, parser);
 		}
 	}
 
@@ -143,9 +144,9 @@ public class Parser {
 		}
 	}
 
-	private void parseSingleOPCS(String codeFile, String validFile, String version, String outFolder, OPCSParser parser)
+	private void parseSingleOPCS(String codeFile, String validFile, String version, String date, String outFolder, OPCSParser parser)
 			throws IOException {
-		parser.processCodeSystemWithUpdate(codeFile, validFile, version, outFolder, txServer,feedClient);
+		parser.processCodeSystemWithUpdate(codeFile, validFile, version, date, outFolder, txServer,feedClient);
 	}
 
 	private void parseSingleODS(String zipFile, String version, String outFolder, ODSParser parser)

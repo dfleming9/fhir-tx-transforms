@@ -69,7 +69,7 @@ public class OPCSParser {
 		for (String line : Utility.readTxtFile(metaFile, false)) {
 
 			if (line.length() > 0) {
-				String selection = line.substring(0,11);
+				String selection = line.substring(0,11).trim();
 				String id = line.substring(12,16);
 	
 				String opreation3 = line.substring(24,79).trim();
@@ -134,7 +134,7 @@ public class OPCSParser {
 		.setStatus(PublicationStatus.ACTIVE)
 		.setExperimental(false)
 		.setCopyright(
-				"Copyright © 2020 Health and Social Care Information Centre. NHS England is the trading name of the Health and Social Care Information Centre.")
+				"Copyright © 2023 Health and Social Care Information Centre. NHS England is the trading name of the Health and Social Care Information Centre.")
 		.setPublisher("NHS England")
 		.setDescription(title + " FHIR CodeSystem")
 		.setContent(CodeSystemContentMode.COMPLETE);

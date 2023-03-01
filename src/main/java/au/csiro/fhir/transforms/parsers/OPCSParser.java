@@ -134,7 +134,7 @@ public class OPCSParser {
 		.setStatus(PublicationStatus.ACTIVE)
 		.setExperimental(false)
 		.setCopyright(
-				"Copyright © 2023 Health and Social Care Information Centre. NHS England is the trading name of the Health and Social Care Information Centre.")
+				"Copyright © 2023 Health and Social Care Information Centre.")
 		.setPublisher("NHS England")
 		.setDescription(title + " FHIR CodeSystem")
 		.setContent(CodeSystemContentMode.COMPLETE);

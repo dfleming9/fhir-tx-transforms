@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ import au.csiro.fhir.transforms.helper.FeedUtility;
 import au.csiro.fhir.transforms.helper.Utility;
 import au.csiro.fhir.transforms.helper.atomio.Entry;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -64,11 +66,20 @@ public class EMISParser {
 			FhirContext ctx = FhirContext.forR4();
 
 			List<EMISMapEntry> entries = parser.loadSourceData("/Users/dougal/Code/Data/emis/EMIS_LOCAL_MAP_full_2.csv");
-			ConceptMap cm = parser.produceConceptMap(entries, "https://prototype/", "0.0.1");
+			String baseUrl =  "https://prototype/";
+			String version = "0.0.1";
+			String emisCSId = "emis-experimental-cs";
+			String emisSnomedCMId = "emis-snomed-experimental-map";
 
+			CodeSystem cs = parser.produceEMISCodeSystem(emisCSId,entries, baseUrl, version);
+			File emisCSFile = new File(cs.getId() + ".json");
+			String emisCSString = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs);
+			Utility.toTextFile(emisCSString, emisCSFile);
+
+			ConceptMap cm = parser.produceConceptMap(emisSnomedCMId, emisCSId, entries, baseUrl, version);
 			File emisSCTMapFile = new File(cm.getId() + ".json");
-			String visionMaxCMString = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cm);
-			Utility.toTextFile(visionMaxCMString, emisSCTMapFile);
+			String emisCMString = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cm);
+			Utility.toTextFile(emisCMString, emisSCTMapFile);
 
 		} catch (CsvValidationException e) {
 			// TODO Auto-generated catch block
@@ -127,9 +138,42 @@ public class EMISParser {
 		return asList;
 	}
 
-    private ConceptMap produceConceptMap(List<EMISMapEntry> mapRows, String baseUrl, String version)
+    private CodeSystem produceEMISCodeSystem(String csId, List<EMISMapEntry> mapRows, String baseUrl, String version)
+    {    
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+
+		CodeSystem codeSystem = new CodeSystem();        
+
+		codeSystem.setId(csId);
+
+		codeSystem.setUrl(baseUrl + csId)
+                .setValueSet(baseUrl + csId + "/vs")
+                .setDescription("A FHIR CodeSystem rendering of " + csId)
+				.setVersion(version)
+                .setTitle(csId + " CodeSystem")
+                .setName(csId)
+                .setStatus(PublicationStatus.DRAFT)
+				.setExperimental(true)
+                .setPublisher("OL")
+                .setCaseSensitive(true)
+				.setContent(CodeSystemContentMode.COMPLETE);
+
+        ArrayList<CodeSystem.ConceptDefinitionComponent> concepts = new ArrayList<CodeSystem.ConceptDefinitionComponent>();
+
+        for(EMISMapEntry entry : mapRows) 
+        {
+            ConceptDefinitionComponent concept = new ConceptDefinitionComponent();
+            concept.setCode(entry.source);
+            concept.setDisplay(entry.sourceLabel.trim());
+            concepts.add(concept);
+        }
+
+		codeSystem.setConcept(concepts);
+		return codeSystem;
+	}
+
+    private ConceptMap produceConceptMap(String cmId, String csId, List<EMISMapEntry> mapRows, String baseUrl, String version)
     {
-        String cmId = "emis-snomed-experimental-map";
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setId(cmId);
 		conceptMap.setUrl(baseUrl + cmId)
@@ -143,7 +187,7 @@ public class EMISParser {
 		ConceptMapGroupComponent groupComponent = new ConceptMapGroupComponent();
 		conceptMap.addGroup(groupComponent);
 
-		groupComponent.setSource("http://prototype/emislocal/vs");
+		groupComponent.setSource(baseUrl + csId);
 		groupComponent.setSourceVersion(version);
 		groupComponent.setTarget("http://snomed.info/sct");
 
